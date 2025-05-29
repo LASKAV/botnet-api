@@ -11,13 +11,13 @@ class ProxyBase(SQLModel):
     port: int
     username: str
     password: str
-    user_id: int = Field(foreign_key="user.id")
 
 
 class Proxy(ProxyBase, table=True):
     __tablename__ = "proxies"
 
     id: int | None = Field(default=None, primary_key=True)
+    user_id: int = Field(foreign_key="user.id")
 
     accounts: list["Account"] = Relationship(back_populates="proxy")
     user: "User" = Relationship(back_populates="proxies")
