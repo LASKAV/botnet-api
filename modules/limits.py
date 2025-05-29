@@ -4,6 +4,7 @@ from sqlmodel import select
 from database import SessionDep
 from models.limit import Limit, LimitCreate, LimitPublic, LimitUpdate
 
+
 router = APIRouter(prefix="/limits", tags=["Limits"])
 
 
