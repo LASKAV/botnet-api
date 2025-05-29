@@ -23,27 +23,48 @@ class AppsPage(BaseModel):
 
 @router.get("/table")
 async def read_apps_table(
-    session: SessionDep, skip: int = 0, limit: int = 5, order: Order = Order.ASC
+    telegram_id: int,
+    session: SessionDep,
+    skip: int = 0,
+    limit: int = 5,
+    order: Order = Order.ASC,
 ) -> AppsPage:
+    user = await get_user_by_telegram_id(telegram_id, session)
+
     order_by = App.id if order == Order.ASC else desc(App.id)
-    statement = select(App).order_by(order_by).offset(skip).limit(limit)
+
+    statement = (
+        select(App)
+        .where(App.user_id == user.id)
+        .order_by(order_by)
+        .offset(skip)
+        .limit(limit)
+    )
+
     apps = await session.exec(statement)
     total = await session.exec(select(func.count()).select_from(App))
     return AppsPage(total=total.one(), apps=apps)
 
 
 @router.get("/")
-async def read_apps(session: SessionDep) -> list[AppPublic]:
-    statement = select(App)
+async def read_apps(telegram_id: int, session: SessionDep) -> list[AppPublic]:
+    user = await get_user_by_telegram_id(telegram_id, session)
+    statement = select(App).where(App.user_id == user.id)
     apps = await session.exec(statement)
     return apps
 
 
 @router.get("/{app_id}")
-async def read_app(app_id: int, session: SessionDep) -> AppPublic:
-    app = await session.get(App, app_id)
+async def read_app(telegram_id: int, app_id: int, session: SessionDep) -> AppPublic:
+    user = await get_user_by_telegram_id(telegram_id, session)
+
+    statement = select(App).where(App.id == app_id, App.user_id == user.id)
+    result = await session.exec(statement)
+    app = result.first()
+
     if not app:
-        raise HTTPException(status_code=404, detail="App not found")
+        raise HTTPException(status_code=404, detail="App not found or access denied")
+
     return app
 
 
@@ -54,14 +75,7 @@ async def create_app(
 ) -> AppPublic:
     user = await get_user_by_telegram_id(telegram_id, session)
 
-    query = select(App).where(
-        App.user_id == user.id,
-        App.api_id == app.api_id,
-        App.api_hash == app.api_hash,
-    )
-    existing_app = await session.exec(query)
-
-    if existing_app.first():
+    if await check_app_exists_for_user(user.id, app.api_id, app.api_hash, session):
         raise HTTPException(
             status_code=409,
             detail="App already exists for this user.",
@@ -83,11 +97,17 @@ async def update_app(
     session: SessionDep,
 ) -> AppPublic:
     user = await get_user_by_telegram_id(telegram_id, session)
+
+    if await check_app_exists_for_user(user.id, app.api_id, app.api_hash, session):
+        raise HTTPException(
+            status_code=409,
+            detail="App already exists for this user.",
+        )
+
     db_app = await session.get(App, app_id)
 
     if not db_app or db_app.user_id != user.id:
-        raise HTTPException(status_code=404,
-                             detail="App not found or access denied")
+        raise HTTPException(status_code=404, detail="App not found or access denied")
 
     app_data = app.model_dump(exclude_unset=True)
     for key, value in app_data.items():
@@ -101,10 +121,25 @@ async def update_app(
 
 
 @router.delete("/{app_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_app(app_id: int, session: SessionDep):
-    app = await session.get(App, app_id)
-    if not app:
-        raise HTTPException(status_code=404, detail="App not found")
+async def delete_app(telegram_id: int, app_id: int, session: SessionDep):
+    user = await get_user_by_telegram_id(telegram_id, session)
 
-    await session.delete(app)
+    db_app = await session.get(App, app_id)
+
+    if not db_app or db_app.user_id != user.id:
+        raise HTTPException(status_code=404, detail="App not found or access denied")
+
+    await session.delete(db_app)
     await session.commit()
+
+
+async def check_app_exists_for_user(
+    user_id: int, api_id: int, api_hash: str, session: SessionDep
+) -> bool:
+    query = select(App).where(
+        App.user_id == user_id,
+        App.api_id == api_id,
+        App.api_hash == api_hash,
+    )
+    existing_app = await session.exec(query)
+    return existing_app.first() is not None
