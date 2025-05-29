@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from .tasks.join_group_task import JoinGroupTask
     from .tasks.spammer_task import SpammerTask
     from .tasks.invitation_task import InvitationTask
+    from .user import User
 
 
 class AccountBase(SQLModel):
@@ -22,6 +23,7 @@ class AccountBase(SQLModel):
     session: Optional[str] = None
 
     app_id: int = Field(foreign_key="apps.id")
+    user_id: int = Field(foreign_key="user.id")
     proxy_id: Optional[int] = Field(default=None, foreign_key="proxies.id")
 
 
@@ -39,13 +41,15 @@ class Account(AccountBase, table=True):
 
     emoji: List[str] = Field(
         default_factory=lambda: ["❤", "🔥", "👍"],
-        sa_column=Column(
-            JSON, server_default='["❤", "🔥", "👍"]'
-        ),
+        sa_column=Column(JSON, server_default='["❤", "🔥", "👍"]'),
     )
 
     app: "App" = Relationship(back_populates="accounts")
+
+    user: "User" = Relationship(back_populates="accounts")
+
     proxy: Optional["Proxy"] = Relationship(back_populates="accounts")
+
     limits: List["Limit"] = Relationship(
         back_populates="account",
         sa_relationship_kwargs={"cascade": "all, delete-orphan"},
