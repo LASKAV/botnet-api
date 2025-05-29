@@ -19,6 +19,7 @@ from models.tasks.join_group_task import *  # noqa: F403
 from models.proxy import *  # noqa: F403
 from models.message_templates import *  # noqa: F403
 from models.limit import * # noqa: F403
+from models.user import * # noqa: F403
 from settings import settings
 
 
