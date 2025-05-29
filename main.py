@@ -15,6 +15,7 @@ from modules import (
     invitations,
     account_management,
     jobs,
+    users,
 )
 from settings import settings
 
@@ -51,6 +52,7 @@ app.include_router(join_group_tasks.router)
 app.include_router(limits.router)
 app.include_router(spammer.router)
 app.include_router(invitations.router)
+app.include_router(users.router)
 
 if settings.enable_kube:
     app.include_router(jobs.router)
