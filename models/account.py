@@ -23,7 +23,6 @@ class AccountBase(SQLModel):
     session: Optional[str] = None
 
     app_id: int = Field(foreign_key="apps.id")
-    user_id: int = Field(foreign_key="user.id")
     proxy_id: Optional[int] = Field(default=None, foreign_key="proxies.id")
 
 
@@ -38,6 +37,8 @@ class Account(AccountBase, table=True):
     join: bool = False
     mail: bool = False
     invite: bool = False
+
+    user_id: int = Field(foreign_key="user.id")
 
     emoji: List[str] = Field(
         default_factory=lambda: ["❤", "🔥", "👍"],
