@@ -42,7 +42,7 @@ async def lifespan(_: FastAPI):
 app = FastAPI(redirect_slashes=True, lifespan=lifespan)
 
 app.include_router(apps.router)
-# app.include_router(proxies.router)
+app.include_router(proxies.router)
 # app.include_router(accounts.router)
 # app.include_router(account_management.router)
 # app.include_router(tasks.router)
