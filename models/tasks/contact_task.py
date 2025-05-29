@@ -9,7 +9,8 @@ if TYPE_CHECKING:
 class ContactTaskBase(SQLModel):
     account_id: int = Field(foreign_key="accounts.id", primary_key=True)
     contact_id: int = Field(foreign_key="accounts.id", primary_key=True)
-    
+    user_id: int = Field(foreign_key="user.id")
+
 
 class ContactTask(ContactTaskBase, table=True):
     __tablename__ = "contact_tasks"
@@ -17,8 +18,10 @@ class ContactTask(ContactTaskBase, table=True):
 
     account: Optional["Account"] = Relationship(
         back_populates="accounts",
-        sa_relationship_kwargs={"foreign_keys": "ContactTask.account_id"})
-    
+        sa_relationship_kwargs={"foreign_keys": "ContactTask.account_id"},
+    )
+
     contact: Optional["Account"] = Relationship(
         back_populates="contacts",
-        sa_relationship_kwargs={"foreign_keys": "ContactTask.contact_id"})
+        sa_relationship_kwargs={"foreign_keys": "ContactTask.contact_id"},
+    )
