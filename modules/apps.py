@@ -5,7 +5,7 @@ from sqlmodel import select, func, desc
 
 from database import SessionDep
 from models.app import App, AppCreate, AppPublic, AppUpdate
-from .users import check_user_permissions
+from .users import check_user_permissions, get_user_by_telegram_id
 
 
 router = APIRouter(prefix="/apps", tags=["Apps"])
@@ -49,20 +49,25 @@ async def read_app(app_id: int, session: SessionDep) -> AppPublic:
 
 @router.post("/")
 @check_user_permissions(required_subscribing=True)
-async def create_app(user_id: int, app: AppCreate, session: SessionDep) -> AppPublic:
+async def create_app(
+    telegram_id: int, app: AppCreate, session: SessionDep
+) -> AppPublic:
+    user = await get_user_by_telegram_id(telegram_id, session)
+
     query = select(App).where(
-        App.user_id == user_id,
+        App.user_id == user.id,
         App.api_id == app.api_id,
         App.api_hash == app.api_hash,
     )
     existing_app = await session.exec(query)
+
     if existing_app.first():
         raise HTTPException(
             status_code=409,
             detail="App already exists for this user.",
         )
-    db_app = App(**app.model_dump(), user_id=user_id)
-    db_app.user_id = user_id
+
+    db_app = App(**app.model_dump(), user_id=user.id)
     session.add(db_app)
     await session.commit()
     await session.refresh(db_app)
