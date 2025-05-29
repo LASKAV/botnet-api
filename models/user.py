@@ -2,6 +2,7 @@ from sqlmodel import Field, Relationship, SQLModel
 from typing import Optional, List, TYPE_CHECKING
 from datetime import date
 
+
 if TYPE_CHECKING:
     from .app import App
     from .proxy import Proxy
