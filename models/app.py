@@ -8,13 +8,13 @@ class AppBase(SQLModel):
     label: str | None = None
     api_id: int
     api_hash: str
-    user_id: int = Field(foreign_key="user.id")
 
 
 class App(AppBase, table=True):
     __tablename__ = "apps"
 
     id: int = Field(default=None, primary_key=True)
+    user_id: int = Field(foreign_key="user.id")
 
     accounts: list["Account"] = Relationship(back_populates="app")
     user: "User" = Relationship(back_populates="apps")
