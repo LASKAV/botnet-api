@@ -5,6 +5,7 @@ from sqlmodel import select, func , desc
 
 from database import SessionDep
 from models.proxy import Proxy, ProxyCreate, ProxyPublic, ProxyUpdate
+from .users import check_user_permissions, get_user_by_telegram_id
 
 
 router = APIRouter(prefix="/proxies", tags=["Proxies"])
@@ -45,8 +46,27 @@ async def read_proxy(proxy_id: int, session: SessionDep) -> ProxyPublic:
 
 
 @router.post("/")
-async def create_proxy(proxy: ProxyCreate, session: SessionDep) -> ProxyPublic:
-    db_proxy = Proxy.model_validate(proxy)
+@check_user_permissions(required_subscribing=True)
+async def create_proxy(telegram_id: int, proxy: ProxyCreate, session: SessionDep) -> ProxyPublic:
+    user = await get_user_by_telegram_id(telegram_id, session)
+
+    query = select(Proxy).where(
+        Proxy.user_id == user.id,
+        Proxy.protocol == proxy.protocol,
+        Proxy.address == proxy.address,
+        Proxy.port == proxy.port,
+        Proxy.username == proxy.username,
+        Proxy.password == proxy.password,
+    )
+    existing_proxy = await session.exec(query)
+
+    if existing_proxy.first():
+        raise HTTPException(
+            status_code=409,
+            detail="Proxy already exists for this user.",
+        )
+
+    db_proxy = Proxy(**proxy.model_dump(), user_id=user.id)
     session.add(db_proxy)
     await session.commit()
     await session.refresh(db_proxy)
