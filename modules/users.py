@@ -28,6 +28,14 @@ async def read_user(user_id: int, session: SessionDep) -> UserPublic:
 
 @router.post("/")
 async def create_user(user: UserCreate, session: SessionDep) -> UserPublic:
+    existing_user = await session.exec(
+        select(User).where(User.telegram_id == user.telegram_id)
+    )
+    if existing_user.first():
+        raise HTTPException(
+            status_code=409, detail="User with this Telegram ID already exists."
+        )
+
     user = User.model_validate(user)
     session.add(user)
     await session.commit()
@@ -42,35 +50,21 @@ def check_user_permissions(
         @wraps(func)
         async def wrapper(telegram_id: int, *args, session: SessionDep, **kwargs):
             user = (
-                await session.exec(
-                    select(User).where(User.telegram_id == telegram_id)
-                )
+                await session.exec(select(User).where(User.telegram_id == telegram_id))
             ).first()
 
             if not user:
-                raise HTTPException(
-                    status_code=404,
-                    detail="User not found"
-                )
+                raise HTTPException(status_code=404, detail="User not found")
 
             if required_admin and not user.admin:
-                raise HTTPException(
-                    status_code=403,
-                    detail="Admin rights required"
-                )
+                raise HTTPException(status_code=403, detail="Admin rights required")
 
             if required_subscribing and not user.subscribing and not user.admin:
                 raise HTTPException(
-                    status_code=403,
-                    detail="Active subscription required"
+                    status_code=403, detail="Active subscription required"
                 )
 
-            return await func(
-                telegram_id=telegram_id,
-                *args,
-                session=session,
-                **kwargs
-            )
+            return await func(telegram_id=telegram_id, *args, session=session, **kwargs)
 
         return wrapper
 
@@ -79,9 +73,7 @@ def check_user_permissions(
 
 async def get_user_by_telegram_id(telegram_id: int, session: SessionDep) -> User:
     user = (
-        await session.exec(
-            select(User).where(User.telegram_id == telegram_id)
-        )
+        await session.exec(select(User).where(User.telegram_id == telegram_id))
     ).first()
 
     if not user:
