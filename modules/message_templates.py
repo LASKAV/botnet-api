@@ -8,17 +8,22 @@ from models.message_templates import (
     MessageTempUpdate,
 )
 from database import SessionDep
+from .users import get_user_by_telegram_id
 
 router = APIRouter(prefix="/message/templates", tags=["Message Templates"])
 
 
 @router.post("")
 async def create_template(
-    template: MessageTemplateCreate, session: SessionDep
+    telegram_id: int, template: MessageTemplateCreate, session: SessionDep
 ) -> MessageTemplatePublic:
+    user = await get_user_by_telegram_id(telegram_id, session)
+
     message_templates_stmt = select(MessageTemplates).where(
-        MessageTemplates.message == template.message
+        MessageTemplates.user_id == user.id,
+        MessageTemplates.message == template.message,
     )
+
     result = await session.exec(message_templates_stmt)
     existing_template = result.first()
 
@@ -27,9 +32,10 @@ async def create_template(
             status_code=400, detail="A template with this message already exists!"
         )
 
-    db_message_templates = MessageTemplates.model_validate(template)
-    session.add(db_message_templates)
+    db_message_templates = MessageTemplates(**template.model_dump(),
+                                             user_id=user.id)
 
+    session.add(db_message_templates)
     await session.commit()
     await session.refresh(db_message_templates)
 
