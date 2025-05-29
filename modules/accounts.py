@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
 from sqlmodel import col, desc, func, insert, literal, select
 from typing import List
+from .users import check_user_permissions, get_user_by_telegram_id
 
 from database import SessionDep
 from models.account import (
@@ -116,8 +117,13 @@ async def read_account(account_id: int, session: SessionDep) -> AccountPublic:
 
 
 @router.post("/")
-async def create_account(account: AccountCreate, session: SessionDep) -> AccountPublic:
-    db_account = Account.model_validate(account)
+@check_user_permissions(required_subscribing=True)
+async def create_account(
+    telegram_id: int, account: AccountCreate, session: SessionDep
+) -> AccountPublic:
+    user = await get_user_by_telegram_id(telegram_id, session)
+
+    db_account = Account(**account.model_dump(), user_id=user.id)
 
     session.add(db_account)
     await session.flush()
@@ -139,23 +145,23 @@ async def create_account(account: AccountCreate, session: SessionDep) -> Account
     session.add_all(limits)
 
     insert_tasks_for_existing = insert(ContactTask).from_select(
-        ["account_id", "contact_id"],
+        ["account_id", "contact_id", "user_id"],
         select(
             col(Account.id).label("account_id"),
             literal(new_account_id).label("contact_id"),
-        ).where(Account.id != new_account_id),
+            literal(user.id).label("user_id"),
+        ).where(Account.user_id == user.id, Account.id != new_account_id),
     )
-
     await session.exec(insert_tasks_for_existing)
 
     insert_tasks_for_new = insert(ContactTask).from_select(
-        ["account_id", "contact_id"],
+        ["account_id", "contact_id", "user_id"],
         select(
             literal(new_account_id).label("account_id"),
             col(Account.id).label("contact_id"),
-        ).where(Account.id != new_account_id),
+            literal(user.id).label("user_id"),
+        ).where(Account.user_id == user.id, Account.id != new_account_id),
     )
-
     await session.exec(insert_tasks_for_new)
 
     await session.commit()
