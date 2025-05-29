@@ -76,10 +76,18 @@ async def create_app(
 
 
 @router.patch("/{app_id}")
-async def update_app(app_id: int, app: AppUpdate, session: SessionDep) -> AppPublic:
+async def update_app(
+    telegram_id: int,
+    app_id: int,
+    app: AppUpdate,
+    session: SessionDep,
+) -> AppPublic:
+    user = await get_user_by_telegram_id(telegram_id, session)
     db_app = await session.get(App, app_id)
-    if not db_app:
-        raise HTTPException(status_code=404, detail="App not found")
+
+    if not db_app or db_app.user_id != user.id:
+        raise HTTPException(status_code=404,
+                             detail="App not found or access denied")
 
     app_data = app.model_dump(exclude_unset=True)
     for key, value in app_data.items():
