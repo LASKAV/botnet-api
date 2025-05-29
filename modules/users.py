@@ -40,18 +40,24 @@ def check_user_permissions(
 ):
     def decorator(func: Callable):
         @wraps(func)
-        async def wrapper(user_id: int, *args, session: SessionDep, **kwargs):
-            user = (await session.exec(select(User).where(User.id == user_id))).first()
+        async def wrapper(telegram_id: int, *args, session: SessionDep, **kwargs):
+            user = (
+                await session.exec(
+                    select(User).where(User.telegram_id == telegram_id)
+                )
+            ).first()
 
             if not user:
                 raise HTTPException(
                     status_code=404,
-                    detail="User not found")
+                    detail="User not found"
+                )
 
             if required_admin and not user.admin:
                 raise HTTPException(
                     status_code=403,
-                    detail="Admin rights required")
+                    detail="Admin rights required"
+                )
 
             if required_subscribing and not user.subscribing and not user.admin:
                 raise HTTPException(
@@ -59,11 +65,26 @@ def check_user_permissions(
                     detail="Active subscription required"
                 )
 
-            return await func(user_id=user_id,
-                               *args,
-                                session=session,
-                                **kwargs)
+            return await func(
+                telegram_id=telegram_id,
+                *args,
+                session=session,
+                **kwargs
+            )
 
         return wrapper
 
     return decorator
+
+
+async def get_user_by_telegram_id(telegram_id: int, session: SessionDep) -> User:
+    user = (
+        await session.exec(
+            select(User).where(User.telegram_id == telegram_id)
+        )
+    ).first()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return user
