@@ -4,6 +4,9 @@ from sqlmodel import select
 from database import SessionDep
 from models.user import User, UserCreate, UserPublic
 
+from functools import wraps
+from typing import Callable
+
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -30,3 +33,37 @@ async def create_user(user: UserCreate, session: SessionDep) -> UserPublic:
     await session.commit()
     await session.refresh(user)
     return user
+
+
+def check_user_permissions(
+    required_admin: bool = False, required_subscribing: bool = False
+):
+    def decorator(func: Callable):
+        @wraps(func)
+        async def wrapper(user_id: int, *args, session: SessionDep, **kwargs):
+            user = (await session.exec(select(User).where(User.id == user_id))).first()
+
+            if not user:
+                raise HTTPException(
+                    status_code=404,
+                    detail="User not found")
+
+            if required_admin and not user.admin:
+                raise HTTPException(
+                    status_code=403,
+                    detail="Admin rights required")
+
+            if required_subscribing and not user.subscribing and not user.admin:
+                raise HTTPException(
+                    status_code=403,
+                    detail="Active subscription required"
+                )
+
+            return await func(user_id=user_id,
+                               *args,
+                                session=session,
+                                **kwargs)
+
+        return wrapper
+
+    return decorator
