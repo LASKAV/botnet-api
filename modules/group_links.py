@@ -55,12 +55,10 @@ class BulkLinkResponse(SQLModel):
 async def create_group_links_bulk(links_data: GroupLinkCreate, session: SessionDep):
     created_links = []
 
-    # Если передан day_limit или time_limit, обновляем их в таблице Limit
     if links_data.day_limit is not None or links_data.time_limit is not None:
         for account_id in links_data.account_id:
             stmt = select(Limit).where(
-                Limit.account_id == account_id,
-                Limit.action_type == "join_group"
+                Limit.account_id == account_id, Limit.action_type == "join_group"
             )
             result = await session.exec(stmt)
             limit_record = result.one_or_none()
@@ -68,15 +66,16 @@ async def create_group_links_bulk(links_data: GroupLinkCreate, session: SessionD
                 if links_data.day_limit is not None:
                     old_day_limit = limit_record.day_limit
                     limit_record.day_limit = links_data.day_limit
-                    limit_record.fact_limit = limit_record.fact_limit - old_day_limit + links_data.day_limit
-                
+                    limit_record.fact_limit = (
+                        limit_record.fact_limit - old_day_limit + links_data.day_limit
+                    )
+
                 if links_data.time_limit is not None:
                     limit_record.time_limit = links_data.time_limit
 
                 session.add(limit_record)
         await session.commit()
 
-    # Создание или повторное использование записей GroupLink
     for link in links_data.link:
         stmt = select(GroupLink).where(GroupLink.link == link)
         result = await session.exec(stmt)
@@ -90,16 +89,13 @@ async def create_group_links_bulk(links_data: GroupLinkCreate, session: SessionD
 
     await session.commit()
 
-    # Обновляем объекты после коммита, чтобы загрузить атрибуты (например, id)
     for db_link in created_links:
         await session.refresh(db_link)
 
     if not links_data.account_id:
         raise HTTPException(status_code=400, detail="No account IDs provided!")
 
-    # Для каждого аккаунта сохраняем ссылки в том же порядке и создаем задачи (связь многие ко многим)
     for account_id in links_data.account_id:
-
         stmt = select(Account).where(Account.id == account_id)
         result = await session.exec(stmt)
         account = result.one_or_none()
@@ -107,13 +103,9 @@ async def create_group_links_bulk(links_data: GroupLinkCreate, session: SessionD
         session.add(account)
 
         for db_link in created_links:
-            join_task = JoinGroupTask(
-                account_id=account_id, 
-                group_link_id=db_link.id
-            )
+            join_task = JoinGroupTask(account_id=account_id, group_link_id=db_link.id)
             session.add(join_task)
     await session.commit()
-
 
 
 @router.get("/{link_id}")
