@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 class UserBase(SQLModel):
     name: str
-    telegram_id: int
+    telegram_id: int = Field(unique=True, index=True)
     admin: bool
     subscribing: bool
     date_start: Optional[date] = None
