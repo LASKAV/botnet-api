@@ -7,6 +7,7 @@ if TYPE_CHECKING:
     from .app import App
     from .proxy import Proxy
     from .account import Account
+    from .message_templates import MessageTemplates
 
 
 class UserBase(SQLModel):
@@ -34,6 +35,11 @@ class User(UserBase, table=True):
     )
 
     apps: Optional[List["App"]] = Relationship(
+        back_populates="user",
+        sa_relationship_kwargs={"cascade": "all, delete-orphan"},
+    )
+
+    messages: Optional[List["MessageTemplates"]] = Relationship(
         back_populates="user",
         sa_relationship_kwargs={"cascade": "all, delete-orphan"},
     )
