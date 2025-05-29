@@ -1,5 +1,6 @@
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field, SQLModel, Relationship
 from pydantic import field_validator
+from .user import User
 
 """
 Model for message_templates_tasks table
@@ -17,9 +18,12 @@ class MessageTemplates(MessageTemplatesBase, table=True):
 
     id: int | None = Field(default=None, primary_key=True)
     description: str = Field(max_length=100)
+    user_id: int = Field(foreign_key="user.id")
 
     # Chat message - 4096 characters for Telegram
     message: str | None = Field(max_length=4096)
+
+    user: "User" = Relationship(back_populates="messages")
 
     """
     Pydantic validator
