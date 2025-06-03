@@ -15,14 +15,13 @@ class UserBase(SQLModel):
     telegram_id: int = Field(unique=True, index=True)
     admin: bool
     subscribing: bool
-    date_start: Optional[date] = None
-    date_end: Optional[date] = None
 
 
 class User(UserBase, table=True):
     __tablename__ = "user"
 
     id: int = Field(default=None, primary_key=True)
+    date_craet: date = Field(default_factory=date.today)
 
     accounts: Optional[List["Account"]] = Relationship(
         back_populates="user",
