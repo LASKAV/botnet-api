@@ -14,10 +14,10 @@ class App(AppBase, table=True):
     __tablename__ = "apps"
 
     id: int = Field(default=None, primary_key=True)
-    user_id: int = Field(foreign_key="user.id")
+    user_id: int = Field(foreign_key="users.id")
 
-    accounts: list["Account"] = Relationship(back_populates="app")
-    user: "User" = Relationship(back_populates="apps")
+    accounts: list["Account"] = Relationship(back_populates="apps")
+    users: "User" = Relationship(back_populates="apps")
 
 
 class AppCreate(AppBase):
