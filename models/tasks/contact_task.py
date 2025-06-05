@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 class ContactTaskBase(SQLModel):
     account_id: int = Field(foreign_key="accounts.id", primary_key=True)
     contact_id: int = Field(foreign_key="accounts.id", primary_key=True)
-    user_id: int = Field(foreign_key="user.id")
+    user_id: int = Field(foreign_key="users.id")
 
 
 class ContactTask(ContactTaskBase, table=True):
