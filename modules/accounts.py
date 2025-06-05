@@ -63,10 +63,23 @@ async def update_emoji(
 
 @router.get("/")
 async def read_accounts(
-    session: SessionDep, skip: int = 0, limit: int = 5, order: Order = Order.ASC
+    telegram_id: int,
+    session: SessionDep,
+    skip: int = 0,
+    limit: int = 5,
+    order: Order = Order.ASC,
 ) -> AccountsPage:
+    user = await get_user_by_telegram_id(telegram_id, session)
     order_by = Account.id if order == Order.ASC else desc(Account.id)
-    statement = select(Account).order_by(order_by).offset(skip).limit(limit)
+
+    statement = (
+        select(Account)
+        .where(Account.user_id == user.id)
+        .order_by(order_by)
+        .offset(skip)
+        .limit(limit)
+    )
+
     accounts = await session.exec(statement)
     total = await session.exec(select(func.count()).select_from(Account))
     return AccountsPage(total=total.one(), accounts=accounts)
@@ -74,6 +87,7 @@ async def read_accounts(
 
 @router.get("/{type}/{status}")
 async def read_accounts_status(
+    telegram_id: int,
     type: str,
     status: bool,
     session: SessionDep,
@@ -81,6 +95,7 @@ async def read_accounts_status(
     limit: int = 5,
     order: Order = Order.ASC,
 ) -> AccountsPage:
+    user = await get_user_by_telegram_id(telegram_id, session)
     order_by = Account.id if order == Order.ASC else desc(Account.id)
 
     status_filters = {
@@ -90,9 +105,11 @@ async def read_accounts_status(
         "invite": Account.invite == status,
     }
 
+    filters = status_filters[type] & (Account.user_id == user)
+    
     statement = (
         select(Account)
-        .where(status_filters[type])
+        .where(filters)
         .order_by(order_by)
         .offset(skip)
         .limit(limit)
