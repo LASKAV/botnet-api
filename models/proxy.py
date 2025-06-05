@@ -19,7 +19,7 @@ class Proxy(ProxyBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
     user_id: int = Field(foreign_key="users.id")
 
-    accounts: list["Account"] = Relationship(back_populates="proxy")
+    accounts: list["Account"] = Relationship(back_populates="proxies")
     users: "User" = Relationship(back_populates="proxies")
 
 
