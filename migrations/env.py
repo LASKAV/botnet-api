@@ -9,7 +9,7 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 from sqlmodel import SQLModel
 
-from models.tasks.spammer_task import * # noqa: F403
+from models.tasks.spammer_task import *  # noqa: F403
 from models.tasks.invitation_task import *  # noqa: F403
 from models.account import *  # noqa: F403
 from models.app import *  # noqa: F403
@@ -18,8 +18,9 @@ from models.group_link import *  # noqa: F403
 from models.tasks.join_group_task import *  # noqa: F403
 from models.proxy import *  # noqa: F403
 from models.message_templates import *  # noqa: F403
-from models.limit import * # noqa: F403
-from models.user import * # noqa: F403
+from models.limit import *  # noqa: F403
+from models.user import *  # noqa: F403
+from models.subscription import *  # noqa: F403
 from settings import settings
 
 
