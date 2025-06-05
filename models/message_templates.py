@@ -18,12 +18,12 @@ class MessageTemplates(MessageTemplatesBase, table=True):
 
     id: int | None = Field(default=None, primary_key=True)
     description: str = Field(max_length=100)
-    user_id: int = Field(foreign_key="user.id")
+    user_id: int = Field(foreign_key="users.id")
 
     # Chat message - 4096 characters for Telegram
     message: str | None = Field(max_length=4096)
 
-    user: "User" = Relationship(back_populates="messages")
+    users: "User" = Relationship(back_populates="messages")
 
     """
     Pydantic validator
