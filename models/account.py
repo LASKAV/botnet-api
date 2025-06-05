@@ -52,7 +52,7 @@ class Account(AccountBase, table=True):
     proxies: Optional["Proxy"] = Relationship(back_populates="accounts")
 
     limits: List["Limit"] = Relationship(
-        back_populates="account",
+        back_populates="accounts",
         sa_relationship_kwargs={"cascade": "all, delete-orphan"},
     )
 
