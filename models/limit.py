@@ -18,7 +18,7 @@ class Limit(LimitBase, table=True):
     id: int = Field(default=None, primary_key=True)
     account_id: int = Field(foreign_key="accounts.id")
 
-    account: Optional["Account"] = Relationship(back_populates="limits")
+    accounts: Optional["Account"] = Relationship(back_populates="limits")
 
 
 class LimitCreate(LimitBase):
