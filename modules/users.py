@@ -33,8 +33,7 @@ async def create_user(user: UserCreate, session: SessionDep) -> UserPublic:
     )
     if existing_user.first():
         raise HTTPException(
-            status_code=409, 
-            detail="User with this Telegram ID already exists."
+            status_code=409, detail="User with this Telegram ID already exists."
         )
 
     user = User.model_validate(user)
