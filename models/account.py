@@ -38,18 +38,18 @@ class Account(AccountBase, table=True):
     mail: bool = False
     invite: bool = False
 
-    user_id: int = Field(foreign_key="user.id")
+    user_id: int = Field(foreign_key="users.id")
 
     emoji: List[str] = Field(
         default_factory=lambda: ["❤", "🔥", "👍"],
         sa_column=Column(JSON, server_default='["❤", "🔥", "👍"]'),
     )
 
-    app: "App" = Relationship(back_populates="accounts")
+    apps: "App" = Relationship(back_populates="accounts")
 
-    user: "User" = Relationship(back_populates="accounts")
+    users: "User" = Relationship(back_populates="accounts")
 
-    proxy: Optional["Proxy"] = Relationship(back_populates="accounts")
+    proxys: Optional["Proxy"] = Relationship(back_populates="accounts")
 
     limits: List["Limit"] = Relationship(
         back_populates="account",
