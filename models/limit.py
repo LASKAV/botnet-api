@@ -11,13 +11,12 @@ class LimitBase(SQLModel):
     time_limit: int = Field(default=60)
     time_update: Optional[datetime] = None
 
-    account_id: int = Field(foreign_key="accounts.id")
-
 
 class Limit(LimitBase, table=True):
     __tablename__ = "limits"
 
     id: int = Field(default=None, primary_key=True)
+    account_id: int = Field(foreign_key="accounts.id")
 
     account: Optional["Account"] = Relationship(back_populates="limits")
 
@@ -28,7 +27,6 @@ class LimitCreate(LimitBase):
     day_limit: Optional[int] = 20
     time_limit: Optional[int] = 60
     fact_limit: Optional[int] = 20
-    
 
 
 class LimitPublic(LimitBase):
