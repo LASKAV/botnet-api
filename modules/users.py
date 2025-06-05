@@ -31,10 +31,9 @@ async def create_user(user: UserCreate, session: SessionDep) -> UserPublic:
     existing_user = await session.exec(
         select(User).where(User.telegram_id == user.telegram_id)
     )
-    if existing_user.first():
-        raise HTTPException(
-            status_code=409, detail="User with this Telegram ID already exists."
-        )
+    user_obj = existing_user.first()
+    if user_obj:
+        return user_obj
 
     user = User.model_validate(user)
     session.add(user)
