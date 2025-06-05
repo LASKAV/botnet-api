@@ -49,7 +49,7 @@ class Account(AccountBase, table=True):
 
     users: "User" = Relationship(back_populates="accounts")
 
-    proxys: Optional["Proxy"] = Relationship(back_populates="accounts")
+    proxies: Optional["Proxy"] = Relationship(back_populates="accounts")
 
     limits: List["Limit"] = Relationship(
         back_populates="account",
