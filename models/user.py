@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from .proxy import Proxy
     from .account import Account
     from .message_templates import MessageTemplates
-    from .subscription import Subscription
+    # from .subscription import Subscription
 
 
 class UserBase(SQLModel):
@@ -45,10 +45,10 @@ class User(UserBase, table=True):
         sa_relationship_kwargs={"cascade": "all, delete-orphan"},
     )
 
-    subscriptions: Optional[List["Subscription"]] = Relationship(
-        back_populates="users",
-        sa_relationship_kwargs={"cascade": "all, delete-orphan"},
-    )
+    # subscriptions: Optional[List["Subscription"]] = Relationship(
+    #     back_populates="users",
+    #     sa_relationship_kwargs={"cascade": "all, delete-orphan"},
+    # )
 
 
 class UserCreate(UserBase):
