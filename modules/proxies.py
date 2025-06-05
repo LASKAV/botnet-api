@@ -55,17 +55,21 @@ async def read_proxies(telegram_id: int, session: SessionDep) -> list[ProxyPubli
 
 @router.get("/{proxy_id}")
 async def read_proxy(
-    telegram_id: int, proxy_id: int, session: SessionDep
+    telegram_id: int,
+    proxy_id: int,
+    session: SessionDep
 ) -> ProxyPublic:
     user = await get_user_by_telegram_id(telegram_id, session)
 
-    statement = select(Proxy).where(Proxy.id == proxy_id, Proxy.user_id == user.id)
+    statement = select(Proxy).where(
+        Proxy.id == proxy_id, Proxy.user_id == user.id)
 
     result = await session.exec(statement)
     proxy = result.first()
 
     if not proxy:
-        raise HTTPException(status_code=404, detail="Proxy not found or access denied")
+        raise HTTPException(status_code=404,
+                             detail="Proxy not found or access denied")
 
     return proxy
 
