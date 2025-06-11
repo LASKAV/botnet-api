@@ -26,6 +26,16 @@ async def read_user(user_id: int, session: SessionDep) -> UserPublic:
     return user
 
 
+@router.get("/{telegram_id}")
+async def read_user_telegram(telegram_id: int, session: SessionDep) -> UserPublic:
+    user = (
+        await session.exec(select(User).where(User.telegram_id == telegram_id))
+    ).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
+
+
 @router.post("/")
 async def create_user(user: UserCreate, session: SessionDep) -> UserPublic:
     existing_user = await session.exec(
