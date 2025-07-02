@@ -16,7 +16,7 @@ wheels/
 .venv
 
 job-template-example.yaml
-job-template.yaml
+# job-template.yaml
 
 .idea/
 .DS_Store
