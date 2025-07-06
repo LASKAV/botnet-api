@@ -1,0 +1,34 @@
+name: Docker Image CI
+
+on:
+    [workflow_dispatch]
+
+jobs:
+    publish_images:
+        runs-on: ubuntu-latest
+        steps:
+            - name: checkout
+              uses: actions/checkout@v4
+            - name: bulid image
+              run: docker build -t botnet-api:test .
+
+
+
+
+# name: Docker Image CI
+
+
+# on:
+#     push:
+#         branches[" dev "]
+
+
+
+# jobe:
+#     build:
+#         runs-on: ubuntu-latest
+    
+#     steps:
+#     - uses: action/checout@v4
+#     - name: Build the Docker Image
+#         run: docker buld . --file Dcokerfile --tag my-image-name:$(date +%s)
