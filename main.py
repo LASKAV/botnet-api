@@ -39,6 +39,8 @@ async def lifespan(_: FastAPI):
     yield
 
 
+# FastAPI init
+
 app = FastAPI(redirect_slashes=True, lifespan=lifespan)
 
 app.include_router(apps.router)
