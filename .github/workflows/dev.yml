@@ -2,13 +2,13 @@ name: botnet-api
 
 on:
   push:
-    branches: [ dev ]                 
+    branches: [ dev ]
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  IMAGE_NAME_LOWER: ${{ github.repository_lower }}
-  
+  IMAGE_NAME_LOWER: ${{ lower(github.repository) }}
+
 jobs:
   botnet-api-dev:
     runs-on: ubuntu-22.04
@@ -33,6 +33,7 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LOWER }}:${{ github.sha }}
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LOWER }}:latest
+
           # cache-from: type=gha
           # cache-to:   type=gha,mode=max
 
