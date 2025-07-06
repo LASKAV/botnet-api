@@ -32,8 +32,6 @@ COPY --from=builder /app /app
 
 ENV PATH="/app/.venv/bin:$PATH"
 
-COPY job-template.yaml /app/job-template.yaml
-
 
 CMD ["fastapi", "run", "/app/main.py", "--host", "0.0.0.0", "--port", "8000"]
 
