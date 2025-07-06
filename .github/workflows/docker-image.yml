@@ -1,10 +1,7 @@
-name: Botnet api dev
+name: Botnet-api
 
 on:
-  push:
-    branches:
-      - dev
-
+    [workflow_dispatch]
 
 jobs:
     publish_images:
@@ -13,4 +10,6 @@ jobs:
             - name: checkout
               uses: actions/checkout@v4
             - name: bulid image
-              run: docker build -t botnet-api:dev .
+              run: docker build -t botnet-api:test .
+
+
