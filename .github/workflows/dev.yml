@@ -4,12 +4,14 @@ on:
   push:
     branches: [ dev ]                 
 
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME_LOWER: ${{ github.repository_lower }}
+  
 jobs:
   botnet-api-dev:
     runs-on: ubuntu-22.04
-    env:
-      REGISTRY: ghcr.io
-      IMAGE_NAME: ${{ github.repository | toLower }}
 
     steps:
       - uses: actions/checkout@v4
