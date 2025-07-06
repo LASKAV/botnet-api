@@ -1,0 +1,16 @@
+name: Botnet api dev
+
+on:
+  push:
+    branches:
+      - dev
+
+
+jobs:
+    publish_images:
+        runs-on: ubuntu-latest
+        steps:
+            - name: checkout
+              uses: actions/checkout@v4
+            - name: bulid image
+              run: docker build -t botnet-api:dev .
