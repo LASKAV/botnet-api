@@ -1,0 +1,25 @@
+# EXAMPLE; Mount template to ./job-template.yaml via volume in production
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "{{ job_name }}"
+spec:
+  backoffLimit: 2
+  ttlSecondsAfterFinished: 0
+  template:
+    spec:
+      imagePullSecrets:
+        - name: ghcr-secret
+      containers:
+        - name: botnet-account-job
+          image: ghcr.io/laskav/botnet-account-job:47fcc0159885120c0e3bcfd965166fbec6f50275
+          env:
+            - name: ACCOUNT_ID
+              value: "{{ account_id }}"
+            - name: API_URL
+              value: "http://botnet-api.quix-manager.svc.cluster.local:8080"
+            - name: REDIS_URL
+              value: "redis://redis.quix-manager.svc.cluster.local:6379"
+            - name: INFINITE
+              value: "false"
+      restartPolicy: Never
