@@ -88,9 +88,9 @@ jobs:
 
           # -------- replace image tag in kustomization.yaml --------
           if [[ "$OSTYPE" == "darwin"* ]]; then
-            sed -i '' "s|\(name: ghcr.io/laskav/botnet-api\).*|\1\n  newTag: ${GITHUB_SHA}|g" "$KUSTOM_FILE"
+            sed -i '' "s|\(name: ghcr.io/laskav/botnet-api\).*|\1\n    newTag: ${GITHUB_SHA}|g" "$KUSTOM_FILE"
           else
-            sed -i    "s|\(name: ghcr.io/laskav/botnet-api\).*|\1\n  newTag: ${GITHUB_SHA}|g" "$KUSTOM_FILE"
+            sed -i    "s|\(name: ghcr.io/laskav/botnet-api\).*|\1\n    newTag: ${GITHUB_SHA}|g" "$KUSTOM_FILE"
           fi
 
           echo "--- AFTER kustomization.yaml ---"
