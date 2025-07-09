@@ -62,13 +62,20 @@ jobs:
         
 
           
-          # macOS vs Linux in-place edit
-          if [[ "$OSTYPE" == "darwin"* ]]; then
-            sed -i '' "s|image: ghcr.io/.*/kubernetes-quix-api:.*|image: ${NEW_TAG}|g" "$FILE"
-          else
-            sed -i "s|image: ghcr.io/.*/kubernetes-quix-api:.*|image: ${NEW_TAG}|g" "$FILE"
-          fi
+          # # macOS vs Linux in-place edit
+          # if [[ "$OSTYPE" == "darwin"* ]]; then
+          #   sed -i '' "s|image: ghcr.io/.*/kubernetes-quix-api:.*|image: ${NEW_TAG}|g" "$FILE"
+          # else
+          #   sed -i "s|image: ghcr.io/.*/kubernetes-quix-api:.*|image: ${NEW_TAG}|g" "$FILE"
+          # fi
           
+          # Replace image tag using sed (macOS and Linux compatible)
+          if [[ "$OSTYPE" == "darwin"* ]]; then
+            sed -i '' "s|image: ghcr.io/.*/kubernetes-cicd-tutorial:.*|image: ghcr.io/laskav/kubernetes-cicd-tutorial:${{ github.sha }}|g" "$FILE"
+          else
+            sed -i "s|image: ghcr.io/.*/kubernetes-cicd-tutorial:.*|image: ghcr.io/laskav/kubernetes-cicd-tutorial:${{ github.sha }}|g" "$FILE"
+          fi
+
           echo "--- AFTER ---"
           cat "$FILE"
 
