@@ -51,14 +51,14 @@ jobs:
 
           # Clone GitOps repo
           git clone https://github.com/laskav/gitops.git gitops
-          cd gitops
+          cd gitops/Docker-templates/BotNet/api
           
           echo "--- BEFORE ---"
-          cat Docker-templates/BotNet/api/deployment.yaml
+          cat deployment.yaml
 
           # --------------  UPDATE IMAGE TAG --------------
-          FILE="Docker-templates/BotNet/api/deployment.yaml"
-          NEW_TAG="ghcr.io/laskav/kubernetes-quix-api:${GITHUB_SHA}"
+          # FILE="Docker-templates/BotNet/api/deployment.yaml"
+          # NEW_TAG="ghcr.io/laskav/kubernetes-quix-api:${GITHUB_SHA}"
         
 
           
@@ -69,15 +69,17 @@ jobs:
           #   sed -i "s|image: ghcr.io/.*/kubernetes-quix-api:.*|image: ${NEW_TAG}|g" "$FILE"
           # fi
           
-          # Replace image tag using sed (macOS and Linux compatible)
+          NEW_TAG="ghcr.io/laskav/kubernetes-cicd-tutorial:${GITHUB_SHA}"
           if [[ "$OSTYPE" == "darwin"* ]]; then
-            sed -i '' "s|image: ghcr.io/.*/kubernetes-cicd-tutorial:.*|image: ghcr.io/laskav/kubernetes-cicd-tutorial:${{ github.sha }}|g" "$FILE"
+            sed -i ''  "s|image: ghcr.io/.*/kubernetes-cicd-tutorial:.*|image: ${NEW_TAG}|g" deployment.yaml
           else
-            sed -i "s|image: ghcr.io/.*/kubernetes-cicd-tutorial:.*|image: ghcr.io/laskav/kubernetes-cicd-tutorial:${{ github.sha }}|g" "$FILE"
+            sed -i     "s|image: ghcr.io/.*/kubernetes-cicd-tutorial:.*|image: ${NEW_TAG}|g" deployment.yaml
           fi
 
           echo "--- AFTER ---"
-          cat "$FILE"
+          cat deployment.yaml
+
+          cd ../../..
 
 
           # --------------  COMMIT & PUSH --------------
