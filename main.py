@@ -39,7 +39,7 @@ async def lifespan(_: FastAPI):
     yield
 
 
-# FastAPI init
+# FastAPI init..
 
 app = FastAPI(redirect_slashes=True, lifespan=lifespan)
 
