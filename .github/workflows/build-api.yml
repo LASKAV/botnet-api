@@ -50,7 +50,7 @@ jobs:
 
           # -------- settings --------
           REPO_URL="https://github.com/laskav/gitops.git"
-          FILE="Docker-templates/BotNet/api/deployment/api-deployment.yaml"
+          FILE="Docker-templates/BotNet/deployment/api-deployment.yaml"
           NEW_TAG="ghcr.io/laskav/botnet-api:${GITHUB_SHA}"
 
           # -------- clone --------
