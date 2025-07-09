@@ -85,5 +85,6 @@ jobs:
             git add "$FILE"
             git commit -m "Update image to ${{ github.sha }}"
             git push -f https://${GIT_TOKEN}@github.com/laskav/gitops.git main
+          fi
 
 
