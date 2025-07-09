@@ -52,23 +52,29 @@ jobs:
           # Clone GitOps repo
           git clone https://github.com/laskav/gitops.git gitops
           cd gitops
-
+          
           echo "--- BEFORE ---"
           cat Docker-templates/BotNet/api/deployment.yaml
 
-          # Replace image tag using sed (macOS and Linux compatible)
+          # --------------  UPDATE IMAGE TAG --------------
+          FILE="Docker-templates/BotNet/api/deployment.yaml"
+          NEW_TAG="ghcr.io/laskav/kubernetes-quix-api:${GITHUB_SHA}"
+        
+
+          
+          # macOS vs Linux in-place edit
           if [[ "$OSTYPE" == "darwin"* ]]; then
-            sed -i '' "s|image: ghcr.io/.*/kubernetes-cicd-tutorial:.*|image: ghcr.io/laskav/kubernetes-cicd-tutorial:${{ github.sha }}|g" Docker-templates/BotNet/api/deployment.yaml
+            sed -i '' "s|image: ghcr.io/.*/kubernetes-quix-api:.*|image: ${NEW_TAG}|g" "$FILE"
           else
-            sed -i "s|image: ghcr.io/.*/kubernetes-cicd-tutorial:.*|image: ghcr.io/laskav/kubernetes-cicd-tutorial:${{ github.sha }}|g" Docker-templates/BotNet/api/deployment.yaml
+            sed -i "s|image: ghcr.io/.*/kubernetes-quix-api:.*|image: ${NEW_TAG}|g" "$FILE"
           fi
           
           echo "--- AFTER ---"
-          cat Docker-templates/BotNet/api/deployment.yaml
+          cat "$FILE"
 
 
-          # Git config
-          git config --global user.name "GitHub Actions"
+          # --------------  COMMIT & PUSH --------------
+          git config --global user.name  "GitHub Actions"
           git config --global user.email "actions@github.com"
 
 
@@ -76,7 +82,7 @@ jobs:
           if git diff --quiet; then
             echo "✅ No changes to commit."
           else
-            git add deployment.yaml
+            git add "$FILE"
             git commit -m "Update image to ${{ github.sha }}"
             git push -f https://${GIT_TOKEN}@github.com/laskav/gitops.git main
 
