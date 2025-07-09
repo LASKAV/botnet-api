@@ -50,7 +50,9 @@ jobs:
 
           # -------- settings --------
           REPO_URL="https://github.com/laskav/gitops.git"
-          FILE="Docker-templates/BotNet/deployment/api-deployment.yaml"
+          KUSTOM_PATH="Docker-templates/BotNet"
+          FILE="${KUSTOM_PATH}/deployment/api-deployment.yaml"
+          KUSTOM_FILE="${KUSTOM_PATH}/kustomization.yaml"
           NEW_TAG="ghcr.io/laskav/botnet-api:${GITHUB_SHA}"
 
           # -------- clone --------
@@ -66,7 +68,7 @@ jobs:
             exit 1
           fi
 
-          # -------- replace image tag --------
+          # -------- replace image tag in deployment --------
           if [[ "$OSTYPE" == "darwin"* ]]; then
             sed -i '' "s|image: ghcr.io/.*/botnet-api:.*|image: ${NEW_TAG}|g" "$FILE"
           else
@@ -76,6 +78,24 @@ jobs:
           echo "--- AFTER ---"
           cat "$FILE"
 
+          echo "--- BEFORE kustomization.yaml ---"
+          if [[ -f "$KUSTOM_FILE" ]]; then
+            cat "$KUSTOM_FILE"
+          else
+            echo "❌ File not found: $KUSTOM_FILE"
+            exit 1
+          fi
+
+          # -------- replace image tag in kustomization.yaml --------
+          if [[ "$OSTYPE" == "darwin"* ]]; then
+            sed -i '' "s|\(name: ghcr.io/laskav/botnet-api\).*|\1\n  newTag: ${GITHUB_SHA}|g" "$KUSTOM_FILE"
+          else
+            sed -i    "s|\(name: ghcr.io/laskav/botnet-api\).*|\1\n  newTag: ${GITHUB_SHA}|g" "$KUSTOM_FILE"
+          fi
+
+          echo "--- AFTER kustomization.yaml ---"
+          cat "$KUSTOM_FILE"
+
           # -------- commit & push --------
           git config --global user.name  "GitHub Actions"
           git config --global user.email "actions@github.com"
@@ -83,7 +103,7 @@ jobs:
           if git diff --quiet; then
             echo "✅ No changes to commit."
           else
-            git add "$FILE"
+            git add "$FILE" "$KUSTOM_FILE"
             git commit -m "Update image to ${GITHUB_SHA}"
             git push "https://x-access-token:${GIT_TOKEN}@github.com/laskav/gitops.git" main
           fi
