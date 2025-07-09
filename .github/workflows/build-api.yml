@@ -40,60 +40,50 @@ jobs:
       - name: Update GitOps repository
         shell: bash
         env:
-            GIT_TOKEN: ${{ secrets.GITOPS_PAT }}
+          GIT_TOKEN: ${{ secrets.GITOPS_PAT }}
         run: |
+          set -euo pipefail
+
           # Configure git credential store
           git config --global credential.helper store
           echo "https://${GIT_TOKEN}:x-oauth-basic@github.com" > ~/.git-credentials
 
-          # Remove any existing gitops directory
-          rm -rf gitops
-
-          # Clone GitOps repo
-          git clone https://github.com/laskav/gitops.git gitops
-          cd gitops/Docker-templates/BotNet/api
-          
-          echo "--- BEFORE ---"
-          cat deployment.yaml
-
-          # --------------  UPDATE IMAGE TAG --------------
-          # FILE="Docker-templates/BotNet/api/deployment.yaml"
-          # NEW_TAG="ghcr.io/laskav/botnet-api:${GITHUB_SHA}"
-        
-
-          
-          # # macOS vs Linux in-place edit
-          # if [[ "$OSTYPE" == "darwin"* ]]; then
-          #   sed -i '' "s|image: ghcr.io/.*/botnet-api:.*|image: ${NEW_TAG}|g" "$FILE"
-          # else
-          #   sed -i "s|image: ghcr.io/.*/botnet-api:.*|image: ${NEW_TAG}|g" "$FILE"
-          # fi
-          
+          # -------- settings --------
+          REPO_URL="https://github.com/laskav/gitops.git"
+          FILE="Docker-templates/BotNet/api/deployment.yaml"
           NEW_TAG="ghcr.io/laskav/botnet-api:${GITHUB_SHA}"
-          if [[ "$OSTYPE" == "darwin"* ]]; then
-            sed -i ''  "s|image: ghcr.io/.*/botnet-api:.*|image: ${NEW_TAG}|g" deployment.yaml
+
+          # -------- clone --------
+          rm -rf gitops
+          git clone "$REPO_URL" gitops
+          cd gitops
+
+          echo "--- BEFORE ---"
+          if [[ -f "$FILE" ]]; then
+            cat "$FILE"
           else
-            sed -i     "s|image: ghcr.io/.*/botnet-api:.*|image: ${NEW_TAG}|g" deployment.yaml
+            echo "❌ File not found: $FILE"
+            exit 1
+          fi
+
+          # -------- replace image tag --------
+          if [[ "$OSTYPE" == "darwin"* ]]; then
+            sed -i '' "s|image: ghcr.io/.*/botnet-api:.*|image: ${NEW_TAG}|g" "$FILE"
+          else
+            sed -i    "s|image: ghcr.io/.*/botnet-api:.*|image: ${NEW_TAG}|g" "$FILE"
           fi
 
           echo "--- AFTER ---"
-          cat deployment.yaml
+          cat "$FILE"
 
-          cd ../../..
-
-
-          # --------------  COMMIT & PUSH --------------
+          # -------- commit & push --------
           git config --global user.name  "GitHub Actions"
           git config --global user.email "actions@github.com"
 
-
-          # Only commit if there are actual changes
           if git diff --quiet; then
             echo "✅ No changes to commit."
           else
             git add "$FILE"
-            git commit -m "Update image to ${{ github.sha }}"
-            git push -f https://${GIT_TOKEN}@github.com/laskav/gitops.git main
+            git commit -m "Update image to ${GITHUB_SHA}"
+            git push "https://x-access-token:${GIT_TOKEN}@github.com/laskav/gitops.git" main
           fi
-
-
