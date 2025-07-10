@@ -15,8 +15,6 @@ wheels/
 # Virtual environments
 .venv
 
-# job-template.yaml
-
 .idea/
 .DS_Store
 README.md
