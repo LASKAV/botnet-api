@@ -4,7 +4,7 @@ from kubernetes_asyncio import client
 
 from settings import settings
 
-with open("job-template.yaml", "r") as stream:
+with open("/app/job-template.yaml", "r") as stream:
     template_text = stream.read()
 
 job_template: Template = Template(template_text)
