@@ -15,5 +15,5 @@ class Settings(BaseSettings):
     kube_context: str | None = None
     kube_namespace: str | None = None
 
-
+#as
 settings = Settings()
