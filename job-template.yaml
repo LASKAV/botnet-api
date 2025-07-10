@@ -17,9 +17,9 @@ spec:
             - name: ACCOUNT_ID
               value: "{{ account_id }}"
             - name: API_URL
-              value: "http://botnet-api.quix-manager.svc.cluster.local:8080"
+              value: "http://botnet-api:8080"
             - name: REDIS_URL
-              value: "redis://redis.quix-manager.svc.cluster.local:6379"
+              value: "redis://redis:6379"
             - name: INFINITE
               value: "false"
       restartPolicy: Never
