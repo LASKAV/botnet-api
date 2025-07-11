@@ -30,7 +30,7 @@ async def init_k8s():
             context=settings.kube_context,
         )
     else:
-        await config.load_incluster_config()
+        config.load_incluster_config()
 
 
 @asynccontextmanager
