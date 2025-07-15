@@ -16,6 +16,8 @@ spec:
           env:
             - name: ACCOUNT_ID
               value: "{{ account_id }}"
+            - name: OWNER_ID
+              value: "{{ owner_id }}"
             - name: API_URL
               value: "http://botnet-api:8080"
             - name: REDIS_URL

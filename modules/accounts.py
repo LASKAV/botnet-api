@@ -53,7 +53,7 @@ async def update_emoji(
     if not account:
         raise HTTPException(status_code=404, detail="Account not found")
 
-    account.emoji = update_data.emoji
+    account.emoji = update_data.emoji if update_data.emoji is not None else []
     session.add(account)
     await session.commit()
     await session.refresh(account)
