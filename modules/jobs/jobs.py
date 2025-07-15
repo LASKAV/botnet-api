@@ -73,7 +73,7 @@ async def read_account_job(account_id: int, session: SessionDep) -> JobStatus:
 
 @router.put("/accounts/{account_id}/job")
 async def update_job_status(
-    account_id: int, req_body: JobStatus, session: SessionDep
+    owner_id: int, account_id: int, req_body: JobStatus, session: SessionDep
 ) -> JobStatus:
     account = await session.get(Account, account_id)
     if not account:
@@ -100,8 +100,8 @@ async def update_job_status(
                 logger.warning(f"Job pods for account {account_id} not deleted yet")
                 raise HTTPException(status_code=409, detail="Job pods not deleted yet")
 
-            logger.info(f"Creating job for account {account_id}")
-            await create_kubernetes_job(batch_v1, account_id)
+            logger.info(f"Owner {owner_id} creating job for account {account_id}")
+            await create_kubernetes_job(batch_v1, account_id, owner_id)
             return JobStatus(active=True)
 
         if job and not req_body.active:

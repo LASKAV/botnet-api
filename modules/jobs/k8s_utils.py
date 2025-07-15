@@ -4,7 +4,7 @@ from kubernetes_asyncio import client
 
 from settings import settings
 
-with open("/app/job-template.yaml", "r") as stream:
+with open("job-template.yaml", "r") as stream:
     template_text = stream.read()
 
 job_template: Template = Template(template_text)
@@ -19,10 +19,11 @@ def deserialize_job_name(job_name: str):
     return int(without_prefix)
 
 
-async def create_kubernetes_job(api: client.BatchV1Api, account_id: int):
+async def create_kubernetes_job(api: client.BatchV1Api, account_id: int, owner_id: int):
     context = {
         "job_name": serialize_job_name(account_id),
         "account_id": account_id,
+        "owner_id": owner_id
     }
 
     rendered_yaml = job_template.render(context)
