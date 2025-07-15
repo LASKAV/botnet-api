@@ -15,5 +15,4 @@ class Settings(BaseSettings):
     kube_context: str | None = None
     kube_namespace: str | None = None
 
-#a
-settings = Settings()
+settings = Settings() # type: ignore[call-arg]
