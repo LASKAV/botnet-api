@@ -23,5 +23,5 @@ spec:
             - name: REDIS_URL
               value: "redis://redis:6379"
             - name: INFINITE
-              value: "true"
+              value: "false"
       restartPolicy: Never
