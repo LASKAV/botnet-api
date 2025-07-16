@@ -1,4 +1,3 @@
-# EXAMPLE; Mount template to ./job-template.yaml via volume in production
 apiVersion: batch/v1
 kind: Job
 metadata:

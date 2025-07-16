@@ -2,17 +2,15 @@ name: Quix Manager API
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
-
+    branches: [main]
 
 jobs:
   build-and-push:
     runs-on: self-hosted
 
     steps:
-
       - name: Checkout code
         uses: actions/checkout@v3
 
