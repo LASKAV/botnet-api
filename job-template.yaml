@@ -12,7 +12,7 @@ spec:
         - name: ghcr-secret
       containers:
         - name: botnet-account-job
-          image: ghcr.io/laskav/botnet-account-job:ef7968ede16e82a5b73e7110c6d9c7155fa336b5
+          image: ghcr.io/laskav/botnet-account-job:6a54b3838b0406b7e275a192fd31c4fe550d2401
           env:
             - name: ACCOUNT_ID
               value: "{{ account_id }}"
